@@ -1,1 +1,6 @@
+# directoriej
+venv
+data/
 
+# files
+.DS_Store
