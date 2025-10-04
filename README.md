@@ -88,7 +88,7 @@ pip install -r requirements     # recursively install all
 Open `colab/knn_a2_demo.ipynb` in Google Colab and run all cells. The notebook will install all of the needed dependencies needed and can either **(a)** download the dataset automatically or **(b)** assume it’s uploaded to your Drive/session.
 
 ## 📥 Dataset Acquisition
-### Option A — Manual (if you have downloaded the zip file directly from Kaggle)
+### Option A: Manual
 1. Download from Kaggle and extract
 2. Place folders `"./data/0/1"`, `"./data/9/"` under `"./data/"`.
 Paths like ./data/0/0.png, ./data/0/10772.png, … are valid; nested subfolders are also handled.
