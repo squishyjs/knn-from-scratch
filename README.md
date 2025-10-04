@@ -15,10 +15,10 @@ The implementation demonstrates machine learning theory → code mapping, clear 
 
 ## Project Goals and Scope
 
-**Goal:**  
+**🎯 Goal:**  
 Implement a KNN classifier from first principles and apply it to a real, non-toy handwritten digit classification task.
 
-**Task:**  
+**📝 Task:**  
 10-class classification of 28×28 grayscale digit images (classes 0–9).
 
 **Emphasis:**
@@ -47,7 +47,7 @@ This implementation recursively scans `./data/<digit>/**/*.png` and automaticall
 
 ---
 
-## Repository Structure
+## 📁 Repository Structure
 
 ```graphql
 knn-from-scratch/               # Root directory
