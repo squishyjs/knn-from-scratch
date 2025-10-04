@@ -1,5 +1,6 @@
-# 🧠 Building a KNN from Scratch  
-## Handwritten Digit Classification (non-MNIST)
+# 🧠 Building a KNN from Scratch
+Author: <span style="color:gold;">John Sciuto</span>
+## ✍️ Handwritten Digit Classification (non-MNIST)
 
 In this project, I implement a **K-Nearest Neighbours (KNN)** model classifier ***from scratch*** (using **NumPy only** for the algorithm), and evaluate it on the **Handwritten Digits Dataset (not in MNIST)**.  
 The implementation demonstrates machine learning theory → code mapping, clear task I/O, and rigorous evaluation, in alignment with **A2: Study, Implement, Present a Machine Learning Model**.
@@ -86,7 +87,7 @@ pip install -r requirements     # recursively install all
 
 Open `colab/knn_a2_demo.ipynb` in Google Colab and run all cells. The notebook will install all of the needed dependencies needed and can either **(a)** download the dataset automatically or **(b)** assume it’s uploaded to your Drive/session.
 
-## Dataset Acquisition
+## 📥 Dataset Acquisition
 ### Option A — Manual (if you have downloaded the zip file directly from Kaggle)
 1. Download from Kaggle and extract
 2. Place folders `"./data/0/1"`, `"./data/9/"` under `"./data/"`.
@@ -149,7 +150,7 @@ Documented experiments (see ***report***)
 - Euclidean vs. Manhattan
 - Uniform vs. distance weighting
 
-# How to Run the Code
+# 💡 How to Run the Code
 ### Train and Evaluate (CLI)
 From the repo root:
 ```bash
@@ -206,9 +207,9 @@ Minimal dependencies required for this project (see requirements.txt):
 pip install -r requirements.txt
 ```
 
-# License and Credits
+# 📜 License and Credits
 
-See LICENCE.
+See [LICENCE](LICENCE).
 
 - **Dataset**: *Handwritten Digits Dataset* (not in MNIST) by ***jcprogjava*** on Kaggle.
 
