@@ -1,63 +1,81 @@
-# Building a KNN from Scratch
+# 🧠 Building a KNN from Scratch  
 ## Handwritten Digit Classification (non-MNIST)
 
-In this project, I implement a K-Nearest Neighbours (KNN) model classifier ***from scratch*** (using **NumPy only** for the algorithm), and evaluating it on the Handwritten Digits Dataset (not in MNIST). I've structured the code to demonstrate pertinent, machine learning theory, including → code mapping, clear task I/O, and ultimately rigorous evaluation. <br> <br>
+In this project, I implement a **K-Nearest Neighbours (KNN)** model classifier ***from scratch*** (using **NumPy only** for the algorithm), and evaluate it on the **Handwritten Digits Dataset (not in MNIST)**.  
+The implementation demonstrates machine learning theory → code mapping, clear task I/O, and rigorous evaluation, in alignment with **A2: Study, Implement, Present a Machine Learning Model**.
 
-**Dataset**: Handwritten Digits Dataset (not in MNIST) by jcprogjava
+---
 
-**Kaggle**: https://www.kaggle.com/datasets/jcprogjava/handwritten-digits-dataset-not-in-mnist
+### 📂 Dataset
+**Source:** Handwritten Digits Dataset (not in MNIST) by *jcprogjava*  
+**Kaggle:** [https://www.kaggle.com/datasets/jcprogjava/handwritten-digits-dataset-not-in-mnist](https://www.kaggle.com/datasets/jcprogjava/handwritten-digits-dataset-not-in-mnist)
 
+---
 
 ## Project Goals and Scope
 
-**Goal**: To implement a KNN classifier from first principles and apply it to a real, non-toy image classification task (handwritten digit symbols).
+**Goal:**  
+Implement a KNN classifier from first principles and apply it to a real, non-toy handwritten digit classification task.
 
-Lightweight application: 10-class classification of 28×28 grayscale digit images (classes 0–9).
+**Task:**  
+10-class classification of 28×28 grayscale digit images (classes 0–9).
 
-Emphasis: Correct, readable implementation; explicit choices for distance metrics and voting; evaluation using appropriate metrics and splits; reproducibility.
+**Emphasis:**
+- Correct, readable, and fully vectorized implementation  
+- Explicit choices for distance metrics and voting strategies  
+- Proper evaluation (accuracy, macro-precision, recall, F1, confusion matrix)  
+- Reproducibility via caching and fixed random seeds  
 
-This repository does not use sklearn.KNeighborsClassifier. scikit-learn is only used for utilities (e.g., stratified splits).
+> ⚠️ `scikit-learn`’s `KNeighborsClassifier` **is not used**.  
+> The library is imported only for utilities (e.g., stratified train/val/test splits).
+
+---
 
 ## Task Definition (A2: Criterion A)
 
-**Input (training & inference)**:
-A 28×28 grayscale image, converted to a 784-dimensional float32 vector with values scaled to [0, 1].
+**Input (Training & Inference):**  
+A 28×28 grayscale image, flattened to a 784-dimensional `float32` vector with values scaled to `[0, 1]`.
 
-**Output**:
-A class label in {0,1,2,3,4,5,6,7,8,9}. Optionally, predict_proba returns per-class vote/weight proportions.
+**Output:**  
+A class label in `{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}`.  
+Optionally, `predict_proba` returns per-class vote or weight proportions.
 
-**Assumptions & data quirks**:
-Kaggle’s auto-unzip may create extra subfolders. This code recursively scans ./data/<digit>/**/*.png and resizes non-28×28 images to 28×28 if needed.
+**Assumptions & Data Quirks:**  
+Kaggle’s auto-unzip may create nested subfolders.  
+This implementation recursively scans `./data/<digit>/**/*.png` and automatically resizes non-28×28 images.
+
+---
 
 ## Repository Structure
+
 ```graphql
-knn-from-scratch/               # my root directory
+knn-from-scratch/               # Root directory
 ├─ README.md
-├─ LICENCE                      # license file (project-specific)
+├─ LICENCE                      # License file (project-specific)
 ├─ requirements.txt
 ├─ colab/
-│  └─ knn_a2_demo.ipynb        # self-contained demo notebook (Colab-friendly)
+│  └─ knn_a2_demo.ipynb         # Self-contained demo notebook (Colab-friendly)
 ├─ data/
-│  ├─ 0/ ...                   # PNGs for class 0 (possibly nested subfolders)
+│  ├─ 0/ ...                    # PNGs for class 0 (possibly nested subfolders)
 │  ├─ 1/ ...
 │  └─ 9/ ...
 │  └─ processed/
-│     └─ digits_28x28.npz      # cached arrays (auto-created)
+│     └─ digits_28x28.npz       # Cached arrays (auto-created)
 ├─ scripts/
-│  ├─ train_knn.py             # build data → fit → eval (val/test) → save model bundle
-│  └─ evaluate_knn.py          # load bundle → eval on test
+│  ├─ train_knn.py              # Build data → fit → eval (val/test) → save model bundle
+│  └─ evaluate_knn.py           # Load model bundle → evaluate on test
 ├─ src/
-│  ├─ dataio.py                # PNG → arrays; normalization; stratified splits; cache
-│  ├─ distances.py             # pairwise Euclidean/Manhattan (vectorized)
-│  ├─ knn.py                   # from-scratch KNN: fit/predict/predict_proba
-│  ├─ metrics.py               # accuracy, macro P/R/F1, confusion matrix
-│  ├─ utils.py                 # seeding, simple timing
-│  └─ visualization.py         # sample display & confusion-matrix plotting (matplotlib)
-└─ venv/                       # local virtual environment (not required for Colab)
+│  ├─ dataio.py                 # PNG → arrays; normalization; stratified splits; cache
+│  ├─ distances.py              # Pairwise Euclidean/Manhattan (vectorized)
+│  ├─ knn.py                    # From-scratch KNN: fit/predict/predict_proba
+│  ├─ metrics.py                # Accuracy, macro P/R/F1, confusion matrix
+│  ├─ utils.py                  # Seeding, simple timing
+│  └─ visualization.py          # Sample display & confusion-matrix plotting (matplotlib)
+└─ venv/                        # Local virtual environment (optional)
 ```
 
 ## Environment Setup
-### Local (...I recommend Python 3.10)
+### Local (I strongly recommend Python 3.10)
 ```bash
 python -m venv venv
 source venv/bin/activate
