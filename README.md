@@ -32,7 +32,7 @@ Implement a KNN classifier from first principles and apply it to a real, non-toy
 
 ---
 
-## Task Definition (A2: Criterion A)
+## Task Definition (A2: Criterion A ✅️)
 
 **Input (Training & Inference):**  
 A 28×28 grayscale image, flattened to a 784-dimensional `float32` vector with values scaled to `[0, 1]`.
@@ -76,7 +76,7 @@ knn-from-scratch/               # Root directory
 ```
 
 ## Environment Setup
-### Local (I strongly recommend Python 3.10)
+### Local (I strongly recommend Python 3.10 🚨)
 ```bash
 python -m venv venv
 source venv/bin/activate
@@ -118,7 +118,7 @@ Default: `train/val/test = 70% / 15% / 15%` with a fixed seed.
 Caching:
 Arrays are saved to `./data/processed/digits_28x28.npz` for fast subsequent runs.
 
-## KNN Implementation (A2: Crtierion B)
+## KNN Implementation (A2: Crtierion B ✅️)
 Implemented in `src/knn.py`:
 
 **Classifier**: `KNNClassifier(k=3, metric="euclidean", weights="uniform")`
@@ -137,7 +137,7 @@ Implemented in `src/knn.py`:
 **Complexity**:
 Time ≈ `O(n_test × n_train × d)` per evaluation (non-indexed brute force). Batched computation controls memory footprint.
 
-## Evaluation (A2: Criterion C)
+## Evaluation (A2: Criterion C ✅️)
 Metrics implemented in `src/metrics.py`:
 
 - **Accuracy**
