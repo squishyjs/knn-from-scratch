@@ -194,7 +194,7 @@ Use within notebooks or ad-hoc scripts to generate figures for your report.
 
 - **No index structures**: For clarity, this implementation omits KD-Trees/ball trees/ANN libraries.
 
-## Requirements
+## 📋 Requirements
 Minimal dependencies required for this project (see requirements.txt):
 
 - numpy, pandas
