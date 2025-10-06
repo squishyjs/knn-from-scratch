@@ -1,48 +1,48 @@
-# 🧠 Building a KNN from Scratch
+# 🧠 Writing KNN Modelfrom Scratch
 Author: <span style="color:gold;">John Sciuto</span>
 ## ✍️ Handwritten Digit Classification (non-MNIST)
 
-In this project, I implement a **K-Nearest Neighbours (KNN)** model classifier ***from scratch*** (using **NumPy only** for the algorithm), and evaluate it on the **Handwritten Digits Dataset (not in MNIST)**.  
+In this project, I implement a **K-Nearest Neighbours (KNN)** model classifier ***from scratch*** (using **NumPy only** for the algorithm), and evaluate it on the **Handwritten Digits Dataset (not in MNIST)**.
 The implementation demonstrates machine learning theory → code mapping, clear task I/O, and rigorous evaluation, in alignment with **A2: Study, Implement, Present a Machine Learning Model**.
 
 ---
 
 ### 📂 Dataset
-**Source:** Handwritten Digits Dataset (not in MNIST) by *jcprogjava*  
+**Source:** Handwritten Digits Dataset (not in MNIST) by *jcprogjava*
 **Kaggle:** [https://www.kaggle.com/datasets/jcprogjava/handwritten-digits-dataset-not-in-mnist](https://www.kaggle.com/datasets/jcprogjava/handwritten-digits-dataset-not-in-mnist)
 
 ---
 
 ## Project Goals and Scope
 
-**🎯 Goal:**  
+**🎯 Goal:**
 Implement a KNN classifier from first principles and apply it to a real, non-toy handwritten digit classification task.
 
-**📝 Task:**  
+**📝 Task:**
 10-class classification of 28×28 grayscale digit images (classes 0–9).
 
 **Emphasis:**
-- Correct, readable, and fully vectorized implementation  
-- Explicit choices for distance metrics and voting strategies  
-- Proper evaluation (accuracy, macro-precision, recall, F1, confusion matrix)  
-- Reproducibility via caching and fixed random seeds  
+- Correct, readable, and fully vectorized implementation
+- Explicit choices for distance metrics and voting strategies
+- Proper evaluation (accuracy, macro-precision, recall, F1, confusion matrix)
+- Reproducibility via caching and fixed random seeds
 
-> ⚠️ `scikit-learn`’s `KNeighborsClassifier` **is not used**.  
+> ⚠️ `scikit-learn`’s `KNeighborsClassifier` **is not used**.
 > The library is imported only for utilities (e.g., stratified train/val/test splits).
 
 ---
 
 ## Task Definition (A2: Criterion A ✅️)
 
-**Input (Training & Inference):**  
+**Input (Training & Inference):**
 A 28×28 grayscale image, flattened to a 784-dimensional `float32` vector with values scaled to `[0, 1]`.
 
-**Output:**  
-A class label in `{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}`.  
+**Output:**
+A class label in `{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}`.
 Optionally, `predict_proba` returns per-class vote or weight proportions.
 
-**Assumptions & Data Quirks:**  
-Kaggle’s auto-unzip may create nested subfolders.  
+**Assumptions & Data Quirks:**
+Kaggle’s auto-unzip may create nested subfolders.
 This implementation recursively scans `./data/<digit>/**/*.png` and automatically resizes non-28×28 images.
 
 ---
