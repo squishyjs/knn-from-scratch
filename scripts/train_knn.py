@@ -1,10 +1,10 @@
 import os
 import argparse
 import numpy as np
-from dataio import build_dataset
-from knn import KNNClassifier
-from metrics import accuracy, precision_recall_f1_macro, confusion_matrix
-from utils import set_seed, Timer
+from src.dataio import build_dataset
+from src.knn import KNNClassifier
+from src.metrics import accuracy, precision_recall_f1_macro, confusion_matrix
+from src.utils import set_seed, Timer
 
 def save_model(path: str, model: KNNClassifier, X_train: np.ndarray, y_train: np.ndarray):
     os.makedirs(os.path.dirname(path), exist_ok=True)
