@@ -1,5 +1,6 @@
-# directoriej
+# directories
 venv
+__pycache__
 data/
 
 # files
