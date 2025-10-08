@@ -1,9 +1,7 @@
-kagglehub
-numpy
-scipy
-pandas
-matplotlib
-seaborn
-scikit-learn # only for split and optional reference baselines
-#	       (not actually being used for KNN model implementation)
-jupyter
+numpy==1.24.3
+Pillow==10.0.0
+scikit-learn==1.3.0
+matplotlib==3.7.2
+seaborn==0.12.2
+tqdm==4.65.0
+joblib==1.3.2

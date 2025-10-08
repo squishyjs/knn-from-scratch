@@ -1,24 +1,79 @@
+"""
+Distance metrics for KNN algorithm.
+All functions are implemented from scratch using NumPy.
+"""
 import numpy as np
-from typing import Literal
 
-MetricName = Literal["euclidean", "manhattan"]
 
-def pairwise_distances(X: np.ndarray, Y: np.ndarray, metric: MetricName = "euclidean") -> np.ndarray:
+def euclidean_distance(x1, x2):
     """
-    Returns distance matrix D of shape (X.shape[0], Y.shape[0]).
-    X: (n_samples, n_features)
-    Y: (m_samples, n_features)
+    Calculate Euclidean distance between two vectors.
+
+    Args:
+        x1: numpy array of shape (n_features,)
+        x2: numpy array of shape (n_features,)
+
+    Returns:
+        float: Euclidean distance
     """
-    if metric == "euclidean":
-        # (x - y)^2 = x^2 + y^2 - 2xy, all vectorized
-        X_sq = np.sum(X**2, axis=1, keepdims=True)         # (n,1)
-        Y_sq = np.sum(Y**2, axis=1, keepdims=True).T       # (1,m)
-        D_sq = X_sq + Y_sq - 2 * X @ Y.T
-        # numerical safety: negatives to zero
-        np.maximum(D_sq, 0.0, out=D_sq)
-        return np.sqrt(D_sq, dtype=X.dtype)
-    elif metric == "manhattan":
-        # broadcasted L1 distance
-        return np.sum(np.abs(X[:, None, :] - Y[None, :, :]), axis=2)
-    else:
-        raise ValueError(f"Unsupported metric: {metric}")
+    return np.sqrt(np.sum((x1 - x2) ** 2))
+
+
+def manhattan_distance(x1, x2):
+    """
+    Calculate Manhattan distance between two vectors.
+
+    Args:
+        x1: numpy array of shape (n_features,)
+        x2: numpy array of shape (n_features,)
+
+    Returns:
+        float: Manhattan distance
+    """
+    return np.sum(np.abs(x1 - x2))
+
+
+def cosine_distance(x1, x2):
+    """
+    Calculate Cosine distance between two vectors.
+
+    Args:
+        x1: numpy array of shape (n_features,)
+        x2: numpy array of shape (n_features,)
+
+    Returns:
+        float: Cosine distance (1 - cosine similarity)
+    """
+    dot_product = np.dot(x1, x2)
+    norm_x1 = np.linalg.norm(x1)
+    norm_x2 = np.linalg.norm(x2)
+
+    if norm_x1 == 0 or norm_x2 == 0:
+        return 1.0
+
+    cosine_similarity = dot_product / (norm_x1 * norm_x2)
+    return 1 - cosine_similarity
+
+
+def minkowski_distance(x1, x2, p=3):
+    """
+    Calculate Minkowski distance between two vectors.
+
+    Args:
+        x1: numpy array of shape (n_features,)
+        x2: numpy array of shape (n_features,)
+        p: int, order of the norm
+
+    Returns:
+        float: Minkowski distance
+    """
+    return np.power(np.sum(np.abs(x1 - x2) ** p), 1/p)
+
+
+# Dictionary to easily access distance functions
+DISTANCE_METRICS = {
+    'euclidean': euclidean_distance,
+    'manhattan': manhattan_distance,
+    'cosine': cosine_distance,
+    'minkowski': minkowski_distance
+}

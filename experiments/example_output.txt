@@ -1,0 +1,87 @@
+[20:11:21] john:knn-from-scratch git:(main !10 ?3) $ python scripts/train_knn.py --max_samples 500 --k 3
+======================================================================
+KNN CLASSIFIER TRAINING
+======================================================================
+Data directory: ./data
+K value: 3
+Distance metric: euclidean
+Test size: 0.2
+Image size: 28x28
+Max samples per class: 500
+======================================================================
+
+[1/5] Loading dataset...
+Found 10 valid classes: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+Excluding non-numeric directories: {'processed'}
+Loading 500 images from class '0'...
+Class 0: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 4617.96it/s]
+Loading 500 images from class '1'...
+Class 1: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 5544.27it/s]
+Loading 500 images from class '2'...
+Class 2: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 5380.21it/s]
+Loading 500 images from class '3'...
+Class 3: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 5273.36it/s]
+Loading 500 images from class '4'...
+Class 4: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 5354.52it/s]
+Loading 500 images from class '5'...
+Class 5: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 5287.99it/s]
+Loading 500 images from class '6'...
+Class 6: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 5114.21it/s]
+Loading 500 images from class '7'...
+Class 7: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 4398.35it/s]
+Loading 500 images from class '8'...
+Class 8: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 4598.20it/s]
+Loading 500 images from class '9'...
+Class 9: 100%|███████████████████████████████████████████████████████████████████████| 500/500 [00:00<00:00, 5165.68it/s]
+
+Dataset loaded: 5000 samples, 784 features
+Label distribution: [500 500 500 500 500 500 500 500 500 500]
+
+[2/5] Analyzing class distribution...
+2025-10-08 20:11:30.974 Python[39793:5185256] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to /var/folders/jy/vxtjd8d9759c45lm7hl8z3c80000gn/T/org.python.python.savedState
+
+[3/5] Splitting data into train and test sets...
+Training samples: 4000
+Testing samples: 1000
+
+[4/5] Training KNN model with k=3...
+Model training complete!
+
+[5/5] Evaluating model...
+
+Training set performance:
+Accuracy: 0.9955
+
+Test set performance:
+Accuracy: 0.9850
+
+======================================================================
+CLASSIFICATION REPORT
+======================================================================
+Class      Precision    Recall       F1-Score     Support   
+------------------------------------------------------------
+0          1.0000       1.0000       1.0000       111       
+1          0.9722       1.0000       0.9859       105       
+2          1.0000       0.9714       0.9855       105       
+3          0.9231       0.9882       0.9545       85        
+4          0.9892       0.9787       0.9840       94        
+5          1.0000       0.9592       0.9792       98        
+6          0.9798       0.9898       0.9848       98        
+7          0.9912       1.0000       0.9956       112       
+8          1.0000       0.9877       0.9938       81        
+9          0.9908       0.9730       0.9818       111       
+------------------------------------------------------------
+Accuracy                             0.9850       1000      
+Macro Avg  0.9846       0.9848       0.9847       1000      
+
+Generating confusion matrix...
+
+Saving model to ./models/knn_model.pkl...
+Model saved to ./models/knn_model.pkl
+
+======================================================================
+TRAINING COMPLETE!
+======================================================================
+Final Test Accuracy: 0.9850
+Model saved to: ./models/knn_model.pkl
+======================================================================

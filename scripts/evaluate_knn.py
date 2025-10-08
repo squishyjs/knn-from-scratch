@@ -1,32 +1,130 @@
+"""
+Script to evaluate trained KNN model on test data.
+"""
+import os
+import sys
 import argparse
 import numpy as np
-from src.dataio import build_dataset
-from src.knn import KNNClassifier
-from src.metrics import accuracy, precision_recall_f1_macro, confusion_matrix
+
+# Add parent directory to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from src.dataio import load_model, load_dataset_from_directory
+from src.utils import train_test_split
+from src.metrics import accuracy_score, classification_report, confusion_matrix
+from src.visualization import plot_confusion_matrix, plot_sample_images
+
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, default="./experiments/knn_model.npz")
+    parser = argparse.ArgumentParser(description='Evaluate KNN model')
+    parser.add_argument('--model_path', type=str, default='./models/knn_model.pkl',
+                        help='Path to trained model')
+    parser.add_argument('--data_dir', type=str, default='./data',
+                        help='Directory containing data')
+    parser.add_argument('--test_size', type=float, default=0.2,
+                        help='Proportion of data to use for testing')
+    parser.add_argument('--max_samples', type=int, default=None,
+                        help='Maximum samples per class to load')
+    parser.add_argument('--image_size', type=int, default=28,
+                        help='Size to resize images to')
+    parser.add_argument('--random_seed', type=int, default=42,
+                        help='Random seed for reproducibility')
+    parser.add_argument('--show_samples', type=int, default=20,
+                        help='Number of sample predictions to display')
+
     args = parser.parse_args()
 
-    # Load data
-    data = build_dataset()
-    X_test, y_test = data["X_test"], data["y_test"]
+    print("="*70)
+    print("KNN MODEL EVALUATION")
+    print("="*70)
+    print(f"Model path: {args.model_path}")
+    print(f"Data directory: {args.data_dir}")
+    print("="*70)
 
-    # Load saved "model"
-    blob = np.load(args.model)
-    X_train = blob["X_train"]
-    y_train = blob["y_train"]
-    k = int(blob["k"]); metric = str(blob["metric"]); weights = str(blob["weights"])
+    # Load model
+    print("\n[1/4] Loading trained model...")
+    if not os.path.exists(args.model_path):
+        print(f"Error: Model file not found at {args.model_path}")
+        print("Please train the model first using train_knn.py")
+        return
 
-    clf = KNNClassifier(k=k, metric=metric, weights=weights).fit(X_train, y_train)
-    y_pred = clf.predict(X_test, batch_size=2048)
+    model = load_model(args.model_path)
+    print(f"Model info: k={model.k}, distance_metric={model.distance_metric}")
 
-    acc = accuracy(y_test, y_pred)
-    p, r, f1 = precision_recall_f1_macro(y_test, y_pred, n_classes=10)
-    cm = confusion_matrix(y_test, y_pred, 10)
-    print(f"[TEST] acc={acc:.4f} macroP={p:.4f} macroR={r:.4f} macroF1={f1:.4f}")
-    print("[TEST] Confusion matrix:\n", cm)
+    # Load dataset
+    print("\n[2/4] Loading dataset...")
+    X, y = load_dataset_from_directory(
+        args.data_dir,
+        target_size=(args.image_size, args.image_size),
+        max_samples_per_class=args.max_samples
+    )
+
+    # Split data (use same seed as training)
+    print("\n[3/4] Splitting data...")
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=args.test_size, random_state=args.random_seed
+    )
+    print(f"Test samples: {len(X_test)}")
+
+    # Make predictions
+    print("\n[4/4] Making predictions...")
+    y_pred = model.predict(X_test)
+
+    # Calculate metrics
+    print("\n" + "="*70)
+    print("EVALUATION RESULTS")
+    print("="*70)
+
+    test_accuracy = accuracy_score(y_test, y_pred)
+    print(f"\nTest Accuracy: {test_accuracy:.4f}")
+
+    print("\n" + "="*70)
+    print("CLASSIFICATION REPORT")
+    print("="*70)
+    print(classification_report(y_test, y_pred))
+
+    # Confusion matrix
+    print("\nGenerating confusion matrix...")
+    cm = confusion_matrix(y_test, y_pred)
+    plot_confusion_matrix(cm, class_names=[str(i) for i in range(10)])
+
+    # Show sample predictions
+    if args.show_samples > 0:
+        print(f"\nDisplaying {args.show_samples} sample predictions...")
+        # Get indices of some correct and incorrect predictions
+        correct_indices = np.where(y_test == y_pred)[0]
+        incorrect_indices = np.where(y_test != y_pred)[0]
+
+        # Mix correct and incorrect samples
+        n_correct = min(args.show_samples // 2, len(correct_indices))
+        n_incorrect = min(args.show_samples - n_correct, len(incorrect_indices))
+
+        sample_indices = np.concatenate([
+            np.random.choice(correct_indices, n_correct, replace=False) if len(correct_indices) > 0 else [],
+            np.random.choice(incorrect_indices, n_incorrect, replace=False) if len(incorrect_indices) > 0 else []
+        ])
+
+        plot_sample_images(
+            X_test[sample_indices],
+            y_test[sample_indices],
+            y_pred[sample_indices],
+            n_samples=len(sample_indices),
+            image_shape=(args.image_size, args.image_size)
+        )
+
+    # Summary
+    correct_predictions = np.sum(y_test == y_pred)
+    incorrect_predictions = np.sum(y_test != y_pred)
+
+    print("\n" + "="*70)
+    print("SUMMARY")
+    print("="*70)
+    print(f"Total test samples: {len(y_test)}")
+    print(f"Correct predictions: {correct_predictions}")
+    print(f"Incorrect predictions: {incorrect_predictions}")
+    print(f"Accuracy: {test_accuracy:.4f} ({test_accuracy*100:.2f}%)")
+    print("="*70)
+
 
 if __name__ == "__main__":
     main()

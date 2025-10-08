@@ -187,6 +187,41 @@ The notebook mirrors the CLI flow: dependency install → data acquisition → p
 
 Use within notebooks or ad-hoc scripts to generate figures for your report.
 
+## 🎨 What the Output *Should* Look Like
+1. Loading Progress - Progress bars for each class (0-9)
+2. Class Distribution - Bar chart showing samples per class
+3. Training Info - Number of train/test samples
+4. Classification Report - Table with precision, recall, F1 for each digit
+5. Confusion Matrix - Heatmap showing predictions vs actual
+6. Accuracy - Final accuracy percentage
+
+See ***[experiments/example_output.txt](example_output.txt)*** for proper CMD visualization model running example + success.
+
+## All Available Training Parameters
+```bash
+python scripts/train_knn.py \
+    --data_dir ./data           # Your data directory
+    --k 5                        # number of neighbors
+    --distance euclidean         # euclidean, manhattan, cosine, minkowski
+    --test_size 0.2             # 20% for testing
+    --max_samples 1000          # limit samples per class (or None for all)
+    --image_size 28             # resize images to 28x28
+    --model_path ./models/knn_model.pkl
+    --random_seed 42            # for reproducibility
+```
+
+## All Available Evaluation Parameters
+```bash
+python scripts/evaluate_knn.py \
+    --model_path ./models/knn_model.pkl
+    --data_dir ./data
+    --test_size 0.2             # must match training
+    --max_samples 1000          # must match training
+    --image_size 28             # must match training
+    --show_samples 20           # number of predictions to visualize
+    --random_seed 42            # must match training
+```
+
 ## Limitations and Notes
 - **Memory/compute**: Brute-force KNN is `O(n_train)` per test sample. If you encounter memory pressure, reduce the `predict` `batch_size` (default in scripts is 2048; lower to 512/256 if needed).
 

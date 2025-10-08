@@ -1,83 +1,161 @@
+"""
+Data input/output utilities for loading and preprocessing image data.
+"""
 import os
-import glob
 import numpy as np
 from PIL import Image
-from typing import Tuple, Dict
-from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 
-DATA_DIR = os.path.join(".", "data")
-PROCESSED_DIR = os.path.join(DATA_DIR, "processed")
-CACHE_PATH = os.path.join(PROCESSED_DIR, "digits_28x28.npz")
 
-def _ensure_dir(path: str):
-    os.makedirs(path, exist_ok=True)
-
-def _iter_image_paths(root: str):
+def load_image(image_path, target_size=(28, 28), grayscale=True, invert=True):
     """
-    Yields (label, path) for any PNG under ./data/<label>/.../*.png
-    Handles nested folders (e.g., ./data/0/0/1.png) gracefully.
+    Load and preprocess a single image.
+    Handles transparent backgrounds by converting to white background.
+
+    Args:
+        image_path: str, path to image file
+        target_size: tuple, target size (height, width)
+        grayscale: bool, whether to convert to grayscale
+        invert: bool, whether to invert colors (for white-on-black images)
+
+    Returns:
+        numpy array: Flattened image array
     """
-    for label in map(str, range(10)):
-        label_dir = os.path.join(root, label)
-        if not os.path.isdir(label_dir):
-            continue
-        # recursive glob
-        for p in glob.glob(os.path.join(label_dir, "**", "*.png"), recursive=True):
-            yield int(label), p
+    try:
+        img = Image.open(image_path)
 
-def _load_png_to_array(p: str) -> np.ndarray:
-    # Convert to grayscale (L), enforce 28x28, return float32 [0,1] flat (784,)
-    img = Image.open(p).convert("L")
-    if img.size != (28, 28):
-        img = img.resize((28, 28), Image.BILINEAR)
-    arr = np.array(img, dtype=np.float32) / 255.0
-    return arr.reshape(-1)  # flatten 28*28 = 784
+        # Handle transparency by compositing onto WHITE background
+        if img.mode in ('RGBA', 'LA', 'PA'):
+            # Create a white background
+            background = Image.new('RGB', img.size, (255, 255, 255))
+            # Paste the image on the white background using alpha channel as mask
+            if img.mode == 'RGBA':
+                background.paste(img, mask=img.split()[3])  # Use alpha channel
+            elif img.mode == 'LA':
+                background.paste(img, mask=img.split()[1])
+            else:
+                background.paste(img)
+            img = background
 
-def build_dataset(
-    data_dir: str = DATA_DIR,
-    cache_path: str = CACHE_PATH,
-    test_size: float = 0.15,
-    val_size: float = 0.15,
-    seed: int = 42,
-    force_rebuild: bool = False,
-) -> Dict[str, np.ndarray]:
+        # Convert to grayscale if needed
+        if grayscale and img.mode != 'L':
+            img = img.convert('L')
+
+        # Resize image
+        img = img.resize(target_size, Image.LANCZOS)
+
+        # Convert to numpy array
+        img_array = np.array(img)
+
+        # Check if image is mostly dark (white digits on black background)
+        # If mean pixel value < 128, it's likely inverted
+        if invert and np.mean(img_array) < 128:
+            img_array = 255 - img_array  # Invert: black becomes white, white becomes black
+
+        # Flatten
+        img_flat = img_array.flatten()
+
+        # Normalize to [0, 1]
+        img_flat = img_flat.astype(np.float32) / 255.0
+
+        return img_flat
+
+    except Exception as e:
+        print(f"Error loading image {image_path}: {e}")
+        return None
+
+
+def load_dataset_from_directory(data_dir, target_size=(28, 28), max_samples_per_class=None, invert=True):
     """
-    Build or load cached dataset.
-    Returns dict with: X_train, y_train, X_val, y_val, X_test, y_test
+    Load dataset from directory structure.
+    Expected structure:
+        data_dir/
+            0/
+                1.png
+                2.png
+                ...
+            1/
+                1.png
+                2.png
+                ...
+            ...
+
+    Args:
+        data_dir: str, root directory containing class subdirectories
+        target_size: tuple, target size for images
+        max_samples_per_class: int or None, maximum samples to load per class
+        invert: bool, whether to invert colors if needed
+
+    Returns:
+        tuple: (X, y) where X is features array and y is labels array
     """
-    _ensure_dir(PROCESSED_DIR)
+    X = []
+    y = []
 
-    if (not force_rebuild) and os.path.isfile(cache_path):
-        data = np.load(cache_path)
-        return {k: data[k] for k in data.files}
+    # Get list of class directories (only numeric 0-9)
+    all_dirs = [d for d in os.listdir(data_dir)
+                if os.path.isdir(os.path.join(data_dir, d))]
 
-    # Load all images
-    xs, ys = [], []
-    for label, path in _iter_image_paths(data_dir):
-        xs.append(_load_png_to_array(path))
-        ys.append(label)
+    # Filter to only numeric class labels (0-9)
+    class_dirs = sorted([d for d in all_dirs if d.isdigit()])
 
-    X = np.stack(xs, axis=0)  # (N, 784)
-    y = np.array(ys, dtype=np.int64)
+    print(f"Found {len(class_dirs)} valid classes: {class_dirs}")
+    if len(all_dirs) > len(class_dirs):
+        excluded = set(all_dirs) - set(class_dirs)
+        print(f"Excluding non-numeric directories: {excluded}")
 
-    # Stratified train / temp split first
-    X_train, X_temp, y_train, y_temp = train_test_split(
-        X, y, test_size=(val_size + test_size), random_state=seed, stratify=y
-    )
-    # Split temp into val / test with the right proportions
-    val_ratio_of_temp = val_size / (val_size + test_size)
-    X_val, X_test, y_val, y_test = train_test_split(
-        X_temp, y_temp, test_size=(1 - val_ratio_of_temp), random_state=seed, stratify=y_temp
-    )
+    for class_label in class_dirs:
+        class_path = os.path.join(data_dir, class_label)
+        image_files = [f for f in os.listdir(class_path)
+                      if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
 
-    np.savez_compressed(
-        cache_path,
-        X_train=X_train, y_train=y_train,
-        X_val=X_val, y_val=y_val,
-        X_test=X_test, y_test=y_test,
-    )
-    return {
-        "X_train": X_train, "y_train": y_train,
-        "X_val": X_val, "y_val": y_val,
-        "X_test": X_test, "y_test": y_test,
-    }
+        # Limit samples if specified
+        if max_samples_per_class is not None:
+            image_files = image_files[:max_samples_per_class]
+
+        print(f"Loading {len(image_files)} images from class '{class_label}'...")
+
+        for image_file in tqdm(image_files, desc=f"Class {class_label}"):
+            image_path = os.path.join(class_path, image_file)
+            img_array = load_image(image_path, target_size=target_size, invert=invert)
+
+            if img_array is not None:
+                X.append(img_array)
+                y.append(int(class_label))
+
+    X = np.array(X)
+    y = np.array(y)
+
+    print(f"\nDataset loaded: {X.shape[0]} samples, {X.shape[1]} features")
+    print(f"Label distribution: {np.bincount(y)}")
+
+    return X, y
+
+
+def save_model(model, filepath):
+    """
+    Save KNN model to file.
+
+    Args:
+        model: KNNClassifier instance
+        filepath: str, path to save file
+    """
+    import joblib
+    joblib.dump(model, filepath)
+    print(f"Model saved to {filepath}")
+
+
+def load_model(filepath):
+    """
+    Load KNN model from file.
+
+    Args:
+        filepath: str, path to model file
+
+    Returns:
+        KNNClassifier instance
+    """
+    import joblib
+    model = joblib.load(filepath)
+    print(f"Model loaded from {filepath}")
+    return model

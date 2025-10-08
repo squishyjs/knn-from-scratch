@@ -1,126 +1,141 @@
+"""
+K-Nearest Neighbors (KNN) Classifier implementation from scratch.
+"""
 import numpy as np
-from typing import Optional, Literal, Tuple
-from .distances import pairwise_distances, MetricName
+from collections import Counter
+from src.distances import DISTANCE_METRICS
 
-Weighting = Literal["uniform", "distance"]
 
 class KNNClassifier:
-    def __init__(self, k: int = 3, metric: MetricName = "euclidean", weights: Weighting = "uniform", eps: float = 1e-9):
-        assert k >= 1, "k must be >= 1"
-        self.k = k
-        self.metric = metric
-        self.weights = weights
-        self.eps = eps
-        self._X = None
-        self._y = None
-        self._classes = None
+    """
+    K-Nearest Neighbors Classifier implemented from scratch.
+    """
 
-    def fit(self, X: np.ndarray, y: np.ndarray):
+    def __init__(self, k=3, distance_metric='euclidean'):
         """
-        Store training set.
-        X: (n_samples, n_features) float32/float64
-        y: (n_samples,) int labels
+        Initialize KNN classifier.
+
+        Args:
+            k: int, number of neighbors to consider
+            distance_metric: str, distance metric to use
         """
-        X = np.asarray(X)
-        y = np.asarray(y)
-        assert X.ndim == 2 and y.ndim == 1 and X.shape[0] == y.shape[0]
-        self._X = X
-        self._y = y
-        self._classes = np.unique(y)
+        self.k = k
+        self.distance_metric = distance_metric
+        self.X_train = None
+        self.y_train = None
+
+        if distance_metric not in DISTANCE_METRICS:
+            raise ValueError(f"Unknown distance metric: {distance_metric}")
+
+        self.distance_function = DISTANCE_METRICS[distance_metric]
+
+    def fit(self, X, y):
+        """
+        Fit the KNN model (store training data).
+
+        Args:
+            X: numpy array of shape (n_samples, n_features)
+            y: numpy array of shape (n_samples,)
+
+        Returns:
+            self
+        """
+        self.X_train = X
+        self.y_train = y
         return self
 
-    def _vote(self, neighbor_labels: np.ndarray, neighbor_dists: Optional[np.ndarray]) -> int:
+    def _predict_single(self, x):
         """
-        neighbor_labels: (k,)
-        neighbor_dists: (k,) or None
+        Predict class for a single sample.
+
+        Args:
+            x: numpy array of shape (n_features,)
+
+        Returns:
+            Predicted class label
         """
-        if self.weights == "uniform" or neighbor_dists is None:
-            # simple majority; break ties by smallest class id
-            labels, counts = np.unique(neighbor_labels, return_counts=True)
-            max_count = counts.max()
-            winners = labels[counts == max_count]
-            return int(np.min(winners))
-        else:
-            # distance weighting: weight = 1 / (dist + eps)
-            w = 1.0 / (neighbor_dists + self.eps)
-            # sum weights per class
-            class_weights = {}
-            for lab, weight in zip(neighbor_labels, w):
-                class_weights[lab] = class_weights.get(lab, 0.0) + weight
-            # winner = max total weight; tie break by smallest class id
-            max_w = max(class_weights.values())
-            winners = [c for c, val in class_weights.items() if np.isclose(val, max_w)]
-            return int(np.min(winners))
+        # Calculate distances to all training samples
+        distances = []
+        for x_train in self.X_train:
+            dist = self.distance_function(x, x_train)
+            distances.append(dist)
 
-    def predict(self, X: np.ndarray, batch_size: int = 1024) -> np.ndarray:
+        distances = np.array(distances)
+
+        # Get indices of k nearest neighbors
+        k_indices = np.argsort(distances)[:self.k]
+
+        # Get labels of k nearest neighbors
+        k_nearest_labels = self.y_train[k_indices]
+
+        # Return most common label
+        counter = Counter(k_nearest_labels)
+        return counter.most_common(1)[0][0]
+
+    def predict(self, X):
         """
-        Predict class labels for X.
-        Processes in batches to control memory.
+        Predict classes for multiple samples.
+
+        Args:
+            X: numpy array of shape (n_samples, n_features)
+
+        Returns:
+            numpy array of predicted labels
         """
-        assert self._X is not None, "Call fit() first."
-        X = np.asarray(X)
-        n = X.shape[0]
-        preds = np.empty((n,), dtype=int)
-        for start in range(0, n, batch_size):
-            end = min(start + batch_size, n)
-            D = pairwise_distances(X[start:end], self._X, metric=self.metric)  # (b, n_train)
-            # argsort along rows, take k nearest
-            idx = np.argpartition(D, kth=self.k-1, axis=1)[:, :self.k]
-            # get sorted k indices for stable voting (optional)
-            row_indices = np.arange(end - start)[:, None]
-            k_dists = D[row_indices, idx]
-            k_labels = self._y[idx]
-            # Optionally fully sort the k neighbors by distance
-            sort_order = np.argsort(k_dists, axis=1)
-            k_dists = np.take_along_axis(k_dists, sort_order, axis=1)
-            k_labels = np.take_along_axis(k_labels, sort_order, axis=1)
+        predictions = []
+        for x in X:
+            pred = self._predict_single(x)
+            predictions.append(pred)
 
-            # vote per row
-            for i in range(end - start):
-                preds[start + i] = self._vote(k_labels[i], k_dists[i] if self.weights == "distance" else None)
-        return preds
+        return np.array(predictions)
 
-    def predict_proba(self, X: np.ndarray, batch_size: int = 1024) -> np.ndarray:
+    def predict_proba(self, X):
         """
-        Returns probabilities per class using vote fractions (uniform) or normalized distance weights.
-        Shape: (n_samples, n_classes) aligned with self.classes_
+        Predict class probabilities for multiple samples.
+
+        Args:
+            X: numpy array of shape (n_samples, n_features)
+
+        Returns:
+            numpy array of shape (n_samples, n_classes) with probabilities
         """
-        assert self._X is not None, "Call fit() first."
-        X = np.asarray(X)
-        n = X.shape[0]
-        classes = self._classes
-        C = len(classes)
-        proba = np.zeros((n, C), dtype=np.float32)
-        class_to_idx = {c: i for i, c in enumerate(classes)}
+        n_samples = X.shape[0]
+        classes = np.unique(self.y_train)
+        n_classes = len(classes)
 
-        for start in range(0, n, batch_size):
-            end = min(start + batch_size, n)
-            D = pairwise_distances(X[start:end], self._X, metric=self.metric)
-            idx = np.argpartition(D, kth=self.k-1, axis=1)[:, :self.k]
-            row_indices = np.arange(end - start)[:, None]
-            k_dists = D[row_indices, idx]
-            k_labels = self._y[idx]
+        probas = np.zeros((n_samples, n_classes))
 
-            if self.weights == "uniform":
-                for i in range(end - start):
-                    counts = {}
-                    for lab in k_labels[i]:
-                        counts[lab] = counts.get(lab, 0) + 1
-                    total = float(self.k)
-                    for lab, cnt in counts.items():
-                        proba[start + i, class_to_idx[lab]] = cnt / total
-            else:
-                for i in range(end - start):
-                    weights = 1.0 / (k_dists[i] + self.eps)
-                    totals = {}
-                    for lab, w in zip(k_labels[i], weights):
-                        totals[lab] = totals.get(lab, 0.0) + float(w)
-                    denom = sum(totals.values()) + 1e-12
-                    for lab, wsum in totals.items():
-                        proba[start + i, class_to_idx[lab]] = wsum / denom
+        for i, x in enumerate(X):
+            # Calculate distances to all training samples
+            distances = []
+            for x_train in self.X_train:
+                dist = self.distance_function(x, x_train)
+                distances.append(dist)
 
-        return proba
+            distances = np.array(distances)
 
-    @property
-    def classes_(self) -> np.ndarray:
-        return self._classes
+            # Get indices of k nearest neighbors
+            k_indices = np.argsort(distances)[:self.k]
+
+            # Get labels of k nearest neighbors
+            k_nearest_labels = self.y_train[k_indices]
+
+            # Calculate probabilities
+            for j, cls in enumerate(classes):
+                probas[i, j] = np.sum(k_nearest_labels == cls) / self.k
+
+        return probas
+
+    def score(self, X, y):
+        """
+        Calculate accuracy score.
+
+        Args:
+            X: numpy array of shape (n_samples, n_features)
+            y: numpy array of shape (n_samples,)
+
+        Returns:
+            float: Accuracy score
+        """
+        predictions = self.predict(X)
+        return np.mean(predictions == y)
