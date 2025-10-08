@@ -55,8 +55,6 @@ knn-from-scratch/
 ├─ requirements.txt
 ├─ README.md
 ├─ LICENCE
-├─ colab/
-│  └─ knn_a2_demo.ipynb        # Demo notebook (Colab-friendly)
 ├─ data/
 │  ├─ 0/ ...                   # PNG/JPG per class (0..9)
 │  └─ 9/ ...
@@ -86,8 +84,6 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
-
-You can also open and run `colab/knn_a2_demo.ipynb` in Google Colab. It mirrors the CLI flow and expects your data (the notebook includes an optional KaggleHub snippet for convenience).
 
 ---
 
