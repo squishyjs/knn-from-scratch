@@ -50,193 +50,167 @@ This implementation recursively scans `./data/<digit>/**/*.png` and automaticall
 ## 📁 Repository Structure
 
 ```graphql
-knn-from-scratch/               # Root directory
-├─ README.md
-├─ LICENCE                      # License file (project-specific)
+knn-from-scratch/
+├─ .gitignore
 ├─ requirements.txt
+├─ README.md
+├─ LICENCE
 ├─ colab/
-│  └─ knn_a2_demo.ipynb         # Self-contained demo notebook (Colab-friendly)
+│  └─ knn_a2_demo.ipynb        # Demo notebook (Colab-friendly)
 ├─ data/
-│  ├─ 0/ ...                    # PNGs for class 0 (possibly nested subfolders)
-│  ├─ 1/ ...
+│  ├─ 0/ ...                   # PNG/JPG per class (0..9)
 │  └─ 9/ ...
-│  └─ processed/
-│     └─ digits_28x28.npz       # Cached arrays (auto-created)
+├─ experiments/
+│  └─ example_output.txt       # Sample console output
 ├─ scripts/
-│  ├─ train_knn.py              # Build data → fit → eval (val/test) → save model bundle
-│  └─ evaluate_knn.py           # Load model bundle → evaluate on test
-├─ src/
-│  ├─ dataio.py                 # PNG → arrays; normalization; stratified splits; cache
-│  ├─ distances.py              # Pairwise Euclidean/Manhattan (vectorized)
-│  ├─ knn.py                    # From-scratch KNN: fit/predict/predict_proba
-│  ├─ metrics.py                # Accuracy, macro P/R/F1, confusion matrix
-│  ├─ utils.py                  # Seeding, simple timing
-│  └─ visualization.py          # Sample display & confusion-matrix plotting (matplotlib)
-└─ venv/                        # Local virtual environment (optional)
+│  ├─ train_knn.py             # Load → split → train → evaluate → save model
+│  ├─ evaluate_knn.py          # Load model → evaluate → visualize
+│  ├─ check_images.py          # Visual sanity-check and invert recommendation
+│  └─ mod_data_dir.py          # Flatten nested class folders if needed
+└─ src/
+   ├─ dataio.py                # Image loading, preprocessing, directory scanning
+   ├─ distances.py             # euclidean, manhattan, cosine, minkowski
+   ├─ knn.py                   # KNNClassifier: fit/predict/predict_proba/score
+   ├─ metrics.py               # accuracy_score, classification_report, confusion_matrix, etc.
+   ├─ utils.py                 # normalize/standardize, simple train_test_split
+   └─ visualization.py         # plots (confusion matrix, samples, class distribution)
 ```
 
-## Environment Setup
-### Local (I strongly recommend Python 3.10 🚨)
+## Environment setup
+
+Recommended: Python 3.10+
+
 ```bash
 python -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements     # recursively install all
-                                # modules and libraries in use
+pip install -r requirements.txt
 ```
 
-Open `colab/knn_a2_demo.ipynb` in Google Colab and run all cells. The notebook will install all of the needed dependencies needed and can either **(a)** download the dataset automatically or **(b)** assume it’s uploaded to your Drive/session.
+You can also open and run `colab/knn_a2_demo.ipynb` in Google Colab. It mirrors the CLI flow and expects your data (the notebook includes an optional KaggleHub snippet for convenience).
 
-## 📥 Dataset Acquisition
-### Option A: Manual
-1. Download from Kaggle and extract
-2. Place folders `"./data/0/1"`, `"./data/9/"` under `"./data/"`.
-Paths like ./data/0/0.png, ./data/0/10772.png, … are valid; nested subfolders are also handled.
+---
 
-### Option B: Programmatic via KaggleHub
-```python
-import kagglehub
-path = kagglehub.dataset_download("jcprogjava/handwritten-digits-dataset-not-in-mnist")
-print("Path to dataset files:", path)
-# move the digit folders 0..9 into ./data/
-```
+## 📥 Dataset acquisition
 
-# Data Processing Pipeline
+- Option A: Manual
+  Download the Kaggle dataset and place images under:
+  - ./data/0, ./data/1, … ./data/9
+  - PNG and JPG are supported; nested numeric subfolders are allowed.
+
+- Option B: Colab-only (optional)
+  The notebook includes an optional KaggleHub snippet to download and copy the 0..9 folders into ./data. This is not required for running the CLI locally.
+
+Tip: If your extracted structure is ./data/0/0/*.png, use `scripts/mod_data_dir.py` to flatten it.
+
+---
+
+## Data processing pipeline
+
 Implemented in `src/dataio.py`:
+- Load PNG/JPG; compose transparent backgrounds over white
+- Convert to grayscale (L), resize to target size (default 28×28)
+- Optional inversion for white-on-black images (default invert=True; pass `--no-invert` to skip)
+- Normalize to [0,1]; flatten to 784-dim
 
-Discovery: Recursively scan `./data/<label>/**.png` for `label ∈ {0,…,9}.`
+Train/test split uses a simple random split implemented in `src/utils.py` (not stratified).
 
-**Load & preprocess**:
+To visually verify image polarity and formatting, run:
 
-- Convert to grayscale; resize to 28×28 if necessary.
-- Convert to `float32` and scale to `[0,1]`.
-- Flatten to vectors of size 784.
+```bash
+python scripts/check_images.py --data_dir ./data --n_samples 3
+```
 
-**Stratified splits**:
-Default: `train/val/test = 70% / 15% / 15%` with a fixed seed.
+If digits look correct without inversion, use `--no-invert` for training/evaluation.
 
-Caching:
-Arrays are saved to `./data/processed/digits_28x28.npz` for fast subsequent runs.
+---
 
-## KNN Implementation (A2: Crtierion B ✅️)
+## KNN implementation
+
 Implemented in `src/knn.py`:
 
-**Classifier**: `KNNClassifier(k=3, metric="euclidean", weights="uniform")`
+- Class: `KNNClassifier(k=3, distance_metric='euclidean')`
+- Supported distances: euclidean, manhattan, cosine, minkowski (`src/distances.py`)
+- Voting: uniform majority among k neighbors (no distance weighting)
+- API:
+  - fit(X, y)
+  - predict(X)
+  - predict_proba(X)  // frequency-based probabilities over k neighbors
+  - score(X, y)       // accuracy
 
-**Supported distances**: Euclidean, Manhattan (`src/distances.py`).
+Complexity: brute-force O(n_test × n_train × d) per evaluation (no tree/ANN index; intentionally simple).
 
-**Voting**:
-- **Uniform** — majority vote among the `k` neighbors.
-- **Distance** — weights are `1 / (dist + ε)`; ties broken by smallest class id.
+---
 
-**API**:
-- `fit(X, y)` — stores the training set (non-parametric).
-- `predict(X, batch_size=1024)` — batched inference to manage memory.
-- `predict_proba(X)` — per-class vote/weight proportions.
+## Evaluation
 
-**Complexity**:
-Time ≈ `O(n_test × n_train × d)` per evaluation (non-indexed brute force). Batched computation controls memory footprint.
+Metrics in `src/metrics.py`:
+- accuracy_score
+- precision_score, recall_score, f1_score (macro/weighted supported)
+- classification_report (text table)
+- confusion_matrix
 
-## Evaluation (A2: Criterion C ✅️)
-Metrics implemented in `src/metrics.py`:
+Visualizations in `src/visualization.py`:
+- plot_confusion_matrix
+- plot_class_distribution
+- plot_sample_images
 
-- **Accuracy**
-- **Macro Precision / Recall / F1**
-- **Confusion matrix**
+---
 
-Documented experiments (see ***report***)
+## 💡 How to run (CLI)
 
-- Varying `k` ∈ {1, 3, 5, 7}
-- Euclidean vs. Manhattan
-- Uniform vs. distance weighting
+Train and evaluate (saves a pickled model with joblib):
 
-# 💡 How to Run the Code
-### Train and Evaluate (CLI)
-From the repo root:
 ```bash
-# first run builds the cache (data/processed/digits_28x28.npz), then evaluates.
 python scripts/train_knn.py \
+  --data_dir ./data \
   --k 5 \
-  --metric euclidean \        # options: euclidean, manhattan
-  --weights uniform \         # options: uniform, distance
-  --seed 42 \
-  --model_out ./experiments/knn_model.npz
+  --distance euclidean \   # euclidean | manhattan | cosine | minkowski
+  --test_size 0.2 \
+  --max_samples 1000 \     # optional cap per class
+  --image_size 28 \
+  --random_seed 42 \
+  --model_path ./models/knn_model.pkl \
+  --no-invert              # add this if your digits are already black-on-white
 ```
 
-This script does the following:
+Evaluate a saved model and visualize:
 
-1. Builds/loads the cached dataset.
-2. Fits KNN (stores X_train, y_train).
-3. Evaluates on validation and test sets; prints metrics and confusion matrices.
-4. Saves a model bundle (experiments/knn_model.npz) with training arrays and config.
-
-Evaluate later using the saved bundle:
-```bash
-python scripts/evaluate_knn.py --model ./experiments/knn_model.npz
-```
-
-### Colab Notebook
-Open and run `colab/knn_a2_demo.ipynb`.
-The notebook mirrors the CLI flow: dependency install → data acquisition → processing → KNN build → evaluation → figures.
-
-## Visualization
-`src/visualization.py` provides:
-
-- `show_samples(X, y, n=16)` — quick grid of random digits.
-- `plot_confusion_matrix(cm, class_names)` — heatmap with per-cell counts.
-
-Use within notebooks or ad-hoc scripts to generate figures for your report.
-
-## 🎨 What the Output *Should* Look Like
-1. Loading Progress - Progress bars for each class (0-9)
-2. Class Distribution - Bar chart showing samples per class
-3. Training Info - Number of train/test samples
-4. Classification Report - Table with precision, recall, F1 for each digit
-5. Confusion Matrix - Heatmap showing predictions vs actual
-6. Accuracy - Final accuracy percentage
-
-See ***[experiments/example_output.txt](example_output.txt)*** for proper CMD visualization model running example + success.
-
-## All Available Training Parameters
-```bash
-python scripts/train_knn.py \
-    --data_dir ./data           # Your data directory
-    --k 5                        # number of neighbors
-    --distance euclidean         # euclidean, manhattan, cosine, minkowski
-    --test_size 0.2             # 20% for testing
-    --max_samples 1000          # limit samples per class (or None for all)
-    --image_size 28             # resize images to 28x28
-    --model_path ./models/knn_model.pkl
-    --random_seed 42            # for reproducibility
-```
-
-## All Available Evaluation Parameters
 ```bash
 python scripts/evaluate_knn.py \
-    --model_path ./models/knn_model.pkl
-    --data_dir ./data
-    --test_size 0.2             # must match training
-    --max_samples 1000          # must match training
-    --image_size 28             # must match training
-    --show_samples 20           # number of predictions to visualize
-    --random_seed 42            # must match training
+  --model_path ./models/knn_model.pkl \
+  --data_dir ./data \
+  --test_size 0.2 \
+  --max_samples 1000 \
+  --image_size 28 \
+  --random_seed 42 \
+  --show_samples 20
 ```
 
-## Limitations and Notes
-- **Memory/compute**: Brute-force KNN is `O(n_train)` per test sample. If you encounter memory pressure, reduce the `predict` `batch_size` (default in scripts is 2048; lower to 512/256 if needed).
+What you’ll see:
+- Per-class loading progress (tqdm)
+- Class distribution bar chart
+- Train/test sizes printed
+- Classification report (precision/recall/F1 per class and macro averages)
+- Confusion matrix heatmap
+- Final accuracy
 
-- **High-dimensional sensitivity**: Distance metrics can degrade in higher dimensions; normalization and simple dimensionality reduction (e.g., PCA for visualization only) may help interpretability, but the core algorithm here remains classic KNN.
+See sample output in [example_output.txt](experiments/example_output.txt).
 
-- **No index structures**: For clarity, this implementation omits KD-Trees/ball trees/ANN libraries.
+---
 
 ## 📋 Requirements
-Minimal dependencies required for this project (see requirements.txt):
+I have used minimal dependenices for this proejct, please match `requirements.txt`:
 
-- numpy, pandas
-- Pillow (image IO)
+- numpy
+- Pillow
+- scikit-learn
 - matplotlib
-- scikit-learn (utilities: stratified splits; optional comparisons)
-- kagglehub (optional; programmatic dataset download)
+- seaborn
+- tqdm
+- joblib
+
+Install via:
 
 ```bash
 pip install -r requirements.txt
