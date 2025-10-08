@@ -1,4 +1,4 @@
-# 🧠 Witing KNN Model From Scratch
+# 🧠 Writing KNN Model From Scratch
 Author: <span style="color:gold;">John Sciuto</span>
 ## ✍️ Handwritten Digit Classification (non-MNIST)
 
