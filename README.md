@@ -2,8 +2,8 @@
 Author: <span style="color:gold;">John Sciuto</span>
 ## ✍️ Handwritten Digit Classification (non-MNIST)
 
-In this project, I implement a **K-Nearest Neighbours (KNN)** model classifier ***from scratch*** (using **NumPy only** for the algorithm), and evaluate it on the **Handwritten Digits Dataset (not in MNIST)**.
-The implementation demonstrates machine learning theory → code mapping, clear task I/O, and rigorous evaluation, in alignment with **A2: Study, Implement, Present a Machine Learning Model**.
+In this project, I implement a **K-Nearest Neighbours (KNN)** classifier ***from scratch*** (using **NumPy only** for the algorithm), and evaluate it on the **Handwritten Digits Dataset (not in MNIST)**.
+The implementation demonstrates varying machine learning theory, including → code mapping, clear task I/O, and thorough evaluation, in alignment with **A2: Study, Implement, Present a Machine Learning Model**.
 
 ---
 
@@ -13,15 +13,15 @@ The implementation demonstrates machine learning theory → code mapping, clear 
 
 ---
 
-## Project Goals and Scope
+## **Project Goals and Scope**
 
-**🎯 Goal:**
-Implement a KNN classifier from first principles and apply it to a real, non-toy handwritten digit classification task.
+### **🎯 Goal**
+Implement a KNN machine learning model classifier from first principles and apply it to a real, non-toy handwritten digit classification task.
 
-**📝 Task:**
+### **📝 Task**
 10-class classification of 28×28 grayscale digit images (classes 0–9).
 
-**Emphasis:**
+#### **Emphasis**
 - Correct, readable, and fully vectorized implementation
 - Explicit choices for distance metrics and voting strategies
 - Proper evaluation (accuracy, macro-precision, recall, F1, confusion matrix)
@@ -47,7 +47,7 @@ This implementation recursively scans `./data/<digit>/**/*.png` and automaticall
 
 ---
 
-## 📁 Repository Structure
+## 📁 **Repository Structure**
 
 ```graphql
 knn-from-scratch/
@@ -85,23 +85,42 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
+### 📋 Requirements
+I have used minimal dependenices for this proejct, please match `requirements.txt`:
+
+- numpy
+- Pillow
+- scikit-learn
+- matplotlib
+- seaborn
+- tqdm
+- joblib
+
+<br>
+
+Install via:
+
+```bash
+pip install -r requirements.txt
+```
 ---
 
-## 📥 Dataset acquisition
+## 📥 **Dataset acquisition**
 
-- Option A: Manual
-  Download the Kaggle dataset and place images under:
+- **Manual** <br>
+  Manually download the Kaggle dataset and place the images under:
   - ./data/0, ./data/1, … ./data/9
-  - PNG and JPG are supported; nested numeric subfolders are allowed.
+  - PNG and JPG are supported; nested numeric subfolders are allowed
 
-- Option B: Colab-only (optional)
-  The notebook includes an optional KaggleHub snippet to download and copy the 0..9 folders into ./data. This is not required for running the CLI locally.
+***NOTE***: If the extracted structure is **"./data/0/0/*.png"**, use `scripts/mod_data_dir.py` to flatten it via:
 
-Tip: If your extracted structure is ./data/0/0/*.png, use `scripts/mod_data_dir.py` to flatten it.
+```bash
+python scripts/mod_data_dir.py
+```
 
 ---
 
-## Data processing pipeline
+## 📈 Data processing pipeline
 
 Implemented in `src/dataio.py`:
 - Load PNG/JPG; compose transparent backgrounds over white
@@ -121,7 +140,7 @@ If digits look correct without inversion, use `--no-invert` for training/evaluat
 
 ---
 
-## KNN implementation
+## 🛠 **KNN Implementation**
 
 Implemented in `src/knn.py`:
 
@@ -134,11 +153,11 @@ Implemented in `src/knn.py`:
   - predict_proba(X)  // frequency-based probabilities over k neighbors
   - score(X, y)       // accuracy
 
-Complexity: brute-force O(n_test × n_train × d) per evaluation (no tree/ANN index; intentionally simple).
+***Complexity***: brute-force **`O(n_test × n_train × d)`** per evaluation (no tree/ANN index; intentionally simple).
 
 ---
 
-## Evaluation
+## ✅ Evaluation
 
 Metrics in `src/metrics.py`:
 - accuracy_score
@@ -153,7 +172,7 @@ Visualizations in `src/visualization.py`:
 
 ---
 
-## 💡 How to run (CLI)
+## 💡 **How To Run (CLI)**
 
 Train and evaluate (saves a pickled model with joblib):
 
@@ -183,7 +202,7 @@ python scripts/evaluate_knn.py \
   --show_samples 20
 ```
 
-What you’ll see:
+***What you’ll see***:
 - Per-class loading progress (tqdm)
 - Class distribution bar chart
 - Train/test sizes printed
@@ -194,23 +213,6 @@ What you’ll see:
 See sample output in [example_output.txt](experiments/example_output.txt).
 
 ---
-
-## 📋 Requirements
-I have used minimal dependenices for this proejct, please match `requirements.txt`:
-
-- numpy
-- Pillow
-- scikit-learn
-- matplotlib
-- seaborn
-- tqdm
-- joblib
-
-Install via:
-
-```bash
-pip install -r requirements.txt
-```
 
 # 📜 License and Credits
 
