@@ -212,6 +212,12 @@ python scripts/evaluate_knn.py \
 - Confusion matrix heatmap
 - Final accuracy
 
+
+#### Example Model Run
+```bash
+python scripts/train_knn.py --distance euclidean --max_samples 200 --k 5
+```
+
 See sample output in [example_output.txt](experiments/example_output.txt).
 
 ---
