@@ -57,7 +57,7 @@ def cosine_distance(x1, x2):
 
 def minkowski_distance(x1, x2, p=3):
     """
-    Calculate Minkowski distance between two vectors.
+    Calculate Minkowski distance between two vectors
 
     Args:
         x1: numpy array of shape (n_features,)
@@ -70,7 +70,7 @@ def minkowski_distance(x1, x2, p=3):
     return np.power(np.sum(np.abs(x1 - x2) ** p), 1/p)
 
 
-# Dictionary to easily access distance functions
+# distance functions (optional uses)
 DISTANCE_METRICS = {
     'euclidean': euclidean_distance,
     'manhattan': manhattan_distance,

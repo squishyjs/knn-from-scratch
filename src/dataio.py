@@ -1,5 +1,5 @@
 """
-Data input/output utilities for loading and preprocessing image data.
+Data input/output utilities for loading and preprocessing image data
 """
 import os
 import numpy as np
@@ -24,38 +24,38 @@ def load_image(image_path, target_size=(28, 28), grayscale=True, invert=True):
     try:
         img = Image.open(image_path)
 
-        # Handle transparency by compositing onto WHITE background
+        '''
+        Handle transparency by transforming
+        background into WHITE
+        '''
         if img.mode in ('RGBA', 'LA', 'PA'):
-            # Create a white background
-            background = Image.new('RGB', img.size, (255, 255, 255))
-            # Paste the image on the white background using alpha channel as mask
+            background = Image.new('RGB', img.size, (255, 255, 255)) # white background
+            # use alpha channel as mask (white background)
             if img.mode == 'RGBA':
-                background.paste(img, mask=img.split()[3])  # Use alpha channel
+                background.paste(img, mask=img.split()[3])  # the alpha channel
             elif img.mode == 'LA':
                 background.paste(img, mask=img.split()[1])
             else:
                 background.paste(img)
             img = background
 
-        # Convert to grayscale if needed
+        # grayscale conversion
         if grayscale and img.mode != 'L':
             img = img.convert('L')
 
-        # Resize image
+        # resize image
         img = img.resize(target_size, Image.LANCZOS)
+        img_array = np.array(img) # convert numpy
 
-        # Convert to numpy array
-        img_array = np.array(img)
-
-        # Check if image is mostly dark (white digits on black background)
-        # If mean pixel value < 128, it's likely inverted
+        # check if image is mostly dark (white digits on black background)
+        # (if mean pixel value < 128 probably inverted)
         if invert and np.mean(img_array) < 128:
             img_array = 255 - img_array  # Invert: black becomes white, white becomes black
 
-        # Flatten
+        # flatten
         img_flat = img_array.flatten()
 
-        # Normalize to [0, 1]
+        # normalize to [0, 1]
         img_flat = img_flat.astype(np.float32) / 255.0
 
         return img_flat
@@ -92,11 +92,11 @@ def load_dataset_from_directory(data_dir, target_size=(28, 28), max_samples_per_
     X = []
     y = []
 
-    # Get list of class directories (only numeric 0-9)
+    # target directories (data: 0 - 9)
     all_dirs = [d for d in os.listdir(data_dir)
                 if os.path.isdir(os.path.join(data_dir, d))]
 
-    # Filter to only numeric class labels (0-9)
+    # filter labels (0 - 9)
     class_dirs = sorted([d for d in all_dirs if d.isdigit()])
 
     print(f"Found {len(class_dirs)} valid classes: {class_dirs}")

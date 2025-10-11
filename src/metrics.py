@@ -1,5 +1,5 @@
 """
-Metrics for evaluating model performance.
+Metrics for evaluating KNN performance
 """
 import numpy as np
 
@@ -20,7 +20,7 @@ def accuracy_score(y_true, y_pred):
 
 def confusion_matrix(y_true, y_pred):
     """
-    Calculate confusion matrix.
+    Build a confusion matrix
 
     Args:
         y_true: numpy array of true labels
@@ -32,14 +32,13 @@ def confusion_matrix(y_true, y_pred):
     classes = np.unique(np.concatenate([y_true, y_pred]))
     n_classes = len(classes)
 
-    # Create mapping from class labels to indices
+    # class labels to indices (mapping)
     class_to_idx = {cls: idx for idx, cls in enumerate(classes)}
 
     # Initialize confusion matrix
     cm = np.zeros((n_classes, n_classes), dtype=int)
 
-    # Fill confusion matrix
-    for true_label, pred_label in zip(y_true, y_pred):
+    for true_label, pred_label in zip(y_true, y_pred): # populate
         true_idx = class_to_idx[true_label]
         pred_idx = class_to_idx[pred_label]
         cm[true_idx, pred_idx] += 1
@@ -152,11 +151,11 @@ def classification_report(y_true, y_pred):
     classes = np.unique(y_true)
     report = []
 
-    # Header
+    # report HEADER
     report.append(f"{'Class':<10} {'Precision':<12} {'Recall':<12} {'F1-Score':<12} {'Support':<10}")
     report.append("-" * 60)
 
-    # Per-class metrics
+    # per class (digit) metric
     for cls in classes:
         true_positives = np.sum((y_true == cls) & (y_pred == cls))
         false_positives = np.sum((y_true != cls) & (y_pred == cls))
@@ -182,7 +181,7 @@ def classification_report(y_true, y_pred):
 
     report.append("-" * 60)
 
-    # Overall metrics
+    # overall metrics
     accuracy = accuracy_score(y_true, y_pred)
     macro_avg_precision = precision_score(y_true, y_pred, average='macro')
     macro_avg_recall = recall_score(y_true, y_pred, average='macro')

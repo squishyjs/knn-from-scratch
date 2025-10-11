@@ -1,11 +1,13 @@
 """
-K-Nearest Neighbors (KNN) Classifier implementation from scratch.
+K-Nearest Neighbors (KNN) machine learning, classifier implementation 
+from scratch
 """
 import numpy as np
 from collections import Counter
 from src.distances import DISTANCE_METRICS
 
 
+# implementation
 class KNNClassifier:
     """
     K-Nearest Neighbors Classifier implemented from scratch.
@@ -54,7 +56,7 @@ class KNNClassifier:
         Returns:
             Predicted class label
         """
-        # Calculate distances to all training samples
+        # 
         distances = []
         for x_train in self.X_train:
             dist = self.distance_function(x, x_train)
@@ -62,13 +64,13 @@ class KNNClassifier:
 
         distances = np.array(distances)
 
-        # Get indices of k nearest neighbors
+        # indicies of 'k' nearest neighbours
         k_indices = np.argsort(distances)[:self.k]
 
-        # Get labels of k nearest neighbors
+        # get label of 'k' nearest neighbours
         k_nearest_labels = self.y_train[k_indices]
 
-        # Return most common label
+        # get most common label
         counter = Counter(k_nearest_labels)
         return counter.most_common(1)[0][0]
 
@@ -106,7 +108,7 @@ class KNNClassifier:
         probas = np.zeros((n_samples, n_classes))
 
         for i, x in enumerate(X):
-            # Calculate distances to all training samples
+            # train sample distances
             distances = []
             for x_train in self.X_train:
                 dist = self.distance_function(x, x_train)
@@ -114,13 +116,12 @@ class KNNClassifier:
 
             distances = np.array(distances)
 
-            # Get indices of k nearest neighbors
+            # indicies of 'k' nearest neighbours
             k_indices = np.argsort(distances)[:self.k]
 
-            # Get labels of k nearest neighbors
+            # get label of 'k' nearest neighbours
             k_nearest_labels = self.y_train[k_indices]
 
-            # Calculate probabilities
             for j, cls in enumerate(classes):
                 probas[i, j] = np.sum(k_nearest_labels == cls) / self.k
 

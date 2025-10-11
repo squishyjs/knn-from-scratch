@@ -1,9 +1,9 @@
 import os
 import shutil
 
-base_dir = "./data"
+base_dir = "./data" # data dir root
 
-# loop through subdirectories 0–9
+# loop through digits (data) 0 to 9
 for i in range(10):
     outer_dir = os.path.join(base_dir, str(i))
     inner_dir = os.path.join(outer_dir, str(i))
@@ -14,12 +14,12 @@ for i in range(10):
             src_path = os.path.join(inner_dir, file_name)
             dst_path = os.path.join(outer_dir, file_name)
 
-            # only move PNG files
+            # move PNG's
             if file_name.lower().endswith(".png"):
                 print(f"Moving {src_path} → {dst_path}")
                 shutil.move(src_path, dst_path)
 
-        # remove the now-empty inner folder
+        # remove the (empty) inner dir
         print(f"Removing directory: {inner_dir}")
         os.rmdir(inner_dir)
 

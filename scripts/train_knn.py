@@ -1,12 +1,12 @@
 """
-Script to train KNN model on handwritten digits dataset.
+Script to train KNN on the (non-MNIST) digits dataset
 """
 import os
 import sys
 import argparse
 import numpy as np
 
-# Add parent directory to path
+# root (parent) directory
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.knn import KNNClassifier
@@ -51,10 +51,10 @@ def main():
     print(f"Max samples per class: {args.max_samples if args.max_samples else 'All'}")
     print("="*70)
 
-    # Create models directory if it doesn't exist
+    # make "models" dir
     os.makedirs(os.path.dirname(args.model_path), exist_ok=True)
 
-    # Load dataset
+    # start loading (read) "./data" (dataset)
     print("\n[1/5] Loading dataset...")
     X, y = load_dataset_from_directory(
         args.data_dir,
@@ -62,11 +62,11 @@ def main():
         max_samples_per_class=args.max_samples
     )
 
-    # Visualize class distribution
+    # class distribution
     print("\n[2/5] Analyzing class distribution...")
     plot_class_distribution(y, class_names=[str(i) for i in range(10)])
 
-    # Split data
+    # data split
     print("\n[3/5] Splitting data into train and test sets...")
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=args.test_size, random_state=args.random_seed
@@ -74,13 +74,13 @@ def main():
     print(f"Training samples: {len(X_train)}")
     print(f"Testing samples: {len(X_test)}")
 
-    # Train model
+    # train
     print(f"\n[4/5] Training KNN model with k={args.k}...")
     model = KNNClassifier(k=args.k, distance_metric=args.distance)
     model.fit(X_train, y_train)
     print("Model training complete!")
 
-    # Evaluate model
+    # evaluate
     print("\n[5/5] Evaluating model...")
     print("\nTraining set performance:")
     train_accuracy = model.score(X_train, y_train)
@@ -96,12 +96,12 @@ def main():
     print("="*70)
     print(classification_report(y_test, y_pred))
 
-    # Confusion matrix
+    # plot CONFUSION MATRIX
     print("\nGenerating confusion matrix...")
     cm = confusion_matrix(y_test, y_pred)
     plot_confusion_matrix(cm, class_names=[str(i) for i in range(10)])
 
-    # Save model
+    # save model
     print(f"\nSaving model to {args.model_path}...")
     save_model(model, args.model_path)
 

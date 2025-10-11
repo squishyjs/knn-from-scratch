@@ -1,5 +1,6 @@
 """
-Utility functions for data processing and model operations.
+Utility functions for processing data and operations
+for the KNN model
 """
 import numpy as np
 from collections import Counter
@@ -62,11 +63,11 @@ def train_test_split(X, y, test_size=0.2, random_state=None):
     n_samples = X.shape[0]
     n_test = int(n_samples * test_size)
 
-    # Shuffle indices
+    # shuffle the indices
     indices = np.arange(n_samples)
     np.random.shuffle(indices)
 
-    # Split indices
+    # split the indices
     test_indices = indices[:n_test]
     train_indices = indices[n_test:]
 

@@ -1,12 +1,12 @@
 """
-Script to evaluate trained KNN model on test data.
+Script to evaluate trained KNN on TEST data
 """
 import os
 import sys
 import argparse
 import numpy as np
 
-# Add parent directory to path
+# parent dir
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.dataio import load_model, load_dataset_from_directory
@@ -41,7 +41,7 @@ def main():
     print(f"Data directory: {args.data_dir}")
     print("="*70)
 
-    # Load model
+    # load model
     print("\n[1/4] Loading trained model...")
     if not os.path.exists(args.model_path):
         print(f"Error: Model file not found at {args.model_path}")
@@ -51,8 +51,7 @@ def main():
     model = load_model(args.model_path)
     print(f"Model info: k={model.k}, distance_metric={model.distance_metric}")
 
-    # Load dataset
-    print("\n[2/4] Loading dataset...")
+    print("\n[2/4] Loading dataset...") # load
     X, y = load_dataset_from_directory(
         args.data_dir,
         target_size=(args.image_size, args.image_size),
@@ -66,11 +65,11 @@ def main():
     )
     print(f"Test samples: {len(X_test)}")
 
-    # Make predictions
+    # predict with KNN
     print("\n[4/4] Making predictions...")
     y_pred = model.predict(X_test)
 
-    # Calculate metrics
+    # metrics (performance)
     print("\n" + "="*70)
     print("EVALUATION RESULTS")
     print("="*70)
@@ -83,19 +82,16 @@ def main():
     print("="*70)
     print(classification_report(y_test, y_pred))
 
-    # Confusion matrix
+    # confusion matrix
     print("\nGenerating confusion matrix...")
     cm = confusion_matrix(y_test, y_pred)
     plot_confusion_matrix(cm, class_names=[str(i) for i in range(10)])
 
-    # Show sample predictions
-    if args.show_samples > 0:
+    if args.show_samples > 0: # GET and DISPLAY predictions
         print(f"\nDisplaying {args.show_samples} sample predictions...")
-        # Get indices of some correct and incorrect predictions
         correct_indices = np.where(y_test == y_pred)[0]
         incorrect_indices = np.where(y_test != y_pred)[0]
 
-        # Mix correct and incorrect samples
         n_correct = min(args.show_samples // 2, len(correct_indices))
         n_incorrect = min(args.show_samples - n_correct, len(incorrect_indices))
 
@@ -112,7 +108,7 @@ def main():
             image_shape=(args.image_size, args.image_size)
         )
 
-    # Summary
+    # summary
     correct_predictions = np.sum(y_test == y_pred)
     incorrect_predictions = np.sum(y_test != y_pred)
 

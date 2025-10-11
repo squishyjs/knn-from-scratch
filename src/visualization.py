@@ -1,5 +1,5 @@
 """
-Visualization utilities for KNN model evaluation.
+Visualization utilities for KNN model evaluation
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -21,7 +21,7 @@ def plot_confusion_matrix(cm, class_names=None, save_path=None, figsize=(10, 8))
 
     plt.figure(figsize=figsize)
 
-    # Plot heatmap
+    # heatmap (to be plotted)
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
                 xticklabels=class_names, yticklabels=class_names,
                 cbar_kws={'label': 'Count'})
@@ -96,7 +96,7 @@ def plot_sample_images(X, y, predictions=None, n_samples=10, image_shape=(28, 28
 
         axes[i].axis('off')
 
-    # Hide extra subplots
+    # subplots (hide)
     for i in range(n_samples, len(axes)):
         axes[i].axis('off')
 
