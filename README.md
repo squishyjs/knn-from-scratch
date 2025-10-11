@@ -56,22 +56,24 @@ knn-from-scratch/
 ├─ README.md
 ├─ LICENCE
 ├─ data/
-│  ├─ 0/ ...                   # PNG/JPG per class (0..9)
+│  ├─ 0/ ...                        # PNG/JPG per class (0 - 9)
 │  └─ 9/ ...
 ├─ experiments/
-│  └─ example_output.txt       # Sample console output
+│  └─ example_output.txt            # sample console output
+├─ models/                          # (model dir will appear after training/evaluating model)
+│  └─ knn_model_manhattan_k3.npz    # sample model output once trained, tested, etc.
 ├─ scripts/
-│  ├─ train_knn.py             # Load → split → train → evaluate → save model
-│  ├─ evaluate_knn.py          # Load model → evaluate → visualize
-│  ├─ check_images.py          # Visual sanity-check and invert recommendation
-│  └─ mod_data_dir.py          # Flatten nested class folders if needed
+│  ├─ train_knn.py                  # load → split → train → evaluate → save model
+│  ├─ evaluate_knn.py               # load model → evaluate → visualize
+│  ├─ check_images.py               # visual sanity-check and invert recommendation (due to nature of dataset)
+│  └─ mod_data_dir.py               # flatten nested class folders if needed (individual script)
 └─ src/
-   ├─ dataio.py                # Image loading, preprocessing, directory scanning
-   ├─ distances.py             # euclidean, manhattan, cosine, minkowski
-   ├─ knn.py                   # KNNClassifier: fit/predict/predict_proba/score
-   ├─ metrics.py               # accuracy_score, classification_report, confusion_matrix, etc.
-   ├─ utils.py                 # normalize/standardize, simple train_test_split
-   └─ visualization.py         # plots (confusion matrix, samples, class distribution)
+   ├─ dataio.py                     # image loading, preprocessing, directory scanning
+   ├─ distances.py                  # euclidean, manhattan, cosine, minkowski
+   ├─ knn.py                        # KNNClassifier: fit/predict/predict_proba/score
+   ├─ metrics.py                    # accuracy_score, classification_report, confusion_matrix, etc.
+   ├─ utils.py                      # normalize train_test_split
+   └─ visualization.py              # plots: confusion matrix, samples, class distribution
 ```
 
 ## Environment setup
