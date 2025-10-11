@@ -213,7 +213,7 @@ python scripts/evaluate_knn.py \
 - Final accuracy
 
 
-#### Example Model Run
+# ***Example Model Run***
 ```bash
 python scripts/train_knn.py --distance euclidean --max_samples 200 --k 5
 ```
