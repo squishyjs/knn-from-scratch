@@ -26,26 +26,26 @@ env/
 ENV/
 .venv
 
-# ide
+# ide stuff
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
 
-# models
+# stuff for models
 models/*.pkl
 models/*.joblib
 
-# logs
+# model/train logs
 *.log
 
-# os
+# os stuff
 .DS_Store
 Thumbs.db
 
-# model data
+# data (manually download/call API)
 data/
 
-# jupyter
+# jupyter stuff
 .ipynb_checkpoints

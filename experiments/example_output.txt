@@ -47,7 +47,7 @@ Testing samples: 1000
 [4/5] Training KNN model with k=3...
 Model training complete!
 
-[5/5] Evaluating model...
+[5/5] Evaluating model..
 
 Training set performance:
 Accuracy: 0.9955
